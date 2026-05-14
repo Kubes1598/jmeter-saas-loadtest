@@ -1,0 +1,33 @@
+name: Load test (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: "Target host (no scheme)"
+        required: true
+        default: "staging.example.com"
+      users:
+        description: "Concurrent users"
+        required: true
+        default: "500"
+
+jobs:
+  jmeter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install JMeter
+        run: |
+          curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz \
+            | tar -xz
+          echo "$PWD/apache-jmeter-5.6.3/bin" >> "$GITHUB_PATH"
+      - name: Run load test
+        run: ./run.sh "${{ github.event.inputs.host }}" "${{ github.event.inputs.users }}"
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-report
+          path: results/
+          retention-days: 14

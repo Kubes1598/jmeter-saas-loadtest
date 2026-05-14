@@ -1,0 +1,4 @@
+results/
+*.jtl
+apache-jmeter-*/
+.DS_Store
